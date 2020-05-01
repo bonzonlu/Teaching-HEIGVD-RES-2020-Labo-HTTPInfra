@@ -1,0 +1,1 @@
+docker run -d --rm -p 9090:80 --name summer-adventure-2020 res/apache_php
