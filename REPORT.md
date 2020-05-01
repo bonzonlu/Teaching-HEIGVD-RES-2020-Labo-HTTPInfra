@@ -7,6 +7,16 @@ Students:
 
 All of our work can be found on [this repo](https://github.com/bonzonlu/Teaching-HEIGVD-RES-2020-Labo-HTTPInfra/tree/fb-apache-static)
 
+## Configuration used for this lab
+
+We've used two different work environments:
+
+![](/home/ducky/HEIG-VD/S4/RES/labo/lab03/doc/manjaro.png)
+
+
+
+
+
 ## Step 1 - Static HTTP server with apache httpd
 
 In this first set we will setup a static Apache HTTP server with Docker.
