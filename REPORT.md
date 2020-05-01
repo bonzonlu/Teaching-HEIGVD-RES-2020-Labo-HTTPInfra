@@ -88,3 +88,5 @@ Since our server will only host one website, we've decided not to create a custo
 
 To build the image you can run the `build-image.sh` script. Then to run the container, execute `run-container.sh`.
 
+### Demo
+
