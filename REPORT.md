@@ -90,3 +90,4 @@ To build the image you can run the `build-image.sh` script. Then to run the cont
 
 ### Demo
 
+![](/home/ducky/HEIG-VD/S4/RES/labo/lab03/doc/demo_step1.jpg)
