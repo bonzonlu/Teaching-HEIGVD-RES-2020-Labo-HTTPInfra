@@ -15,7 +15,7 @@ We've used two different work environments:
 
 
 
-
+![](/home/ducky/HEIG-VD/S4/RES/labo/lab03/doc/apple_master_race.jpg)
 
 ## Step 1 - Static HTTP server with apache httpd
 
