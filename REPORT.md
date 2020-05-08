@@ -134,7 +134,7 @@ CMD ["node", "index.js"]
 
 We've based our docker image on the official [**NodeJS**](https://hub.docker.com/_/node) image in version **12.16.3**.
 
-The first thing we do is create our server side working directory in `/opt/app` . Then we install the dependencies of our (cool) app by copying the `package.json` and `package-lock.json` to the server and then running `npm i` (this is a shortcut for `npm install`, since we're lazy, we've decided to use it :D).
+The first thing we did is to create our server side working directory in `/opt/app` . Then we installed the dependencies of our (cool) app by copying the `package.json` and `package-lock.json` to the server and then running `npm i` (this is a shortcut for `npm install`, since we're lazy, we've decided to use it..don't judge!).
 
 Once the dependencies installed, we can copy our app to the server.
 
@@ -144,38 +144,60 @@ Note: We've added a `.dockerignore` file to avoid copying the `node_modules` to 
 
 [Source](https://nodejs.org/fr/docs/guides/nodejs-docker-webapp/)
 
+### Setup
+
+To start using our app (or improve it), you'll need to run the following commands
+
+```bash
+docker build -t res/express .
+docker run -d -p 9090:3000 res/express
+```
+
+You'll then be able to access the app on `localhost:9090`. Pretty cool right?
+
+>Note: If you decided to improve our application (btw thank you) you'll need to rebuild the image and create a new container (i.e. you'll have to rerun the above commands :/).
+
+### Application 
+
+For our application we've used the minimalist yet awesome framework [express.js](https://expressjs.com/) and the amazing [Chance.js](https://chancejs.com/index.html) librairie.  Our app will generate random user profiles and hashtags and return them in the json format.
+
+You can can generate them using the following `GET` routes: 
+
+* `/hashtag`
+* `/profile`
+* `/profile/:count`
+
+> Note: `:count` is the number of profiles you wish to create.
+
 ### Usage
 
-It is good practice when we create a new Node.js app to do a `npm init`. The command ask for the following: an app name, a version, a description, an entry point, and a few other infos. which we leave as defaults. It will then create a `package.json` file.
+Here are some example of usage of our application.
 
-The main script will be located in the `index.js` file. Inside this file we create a simple app which uses the [chance.js](https://chancejs.com/) module to display a welcome message followed by the name of a random person.
+#### Telnet
 
-```javascript
-//index.js
+```bash
+$ telnet localhost 9090
+Trying ::1...
+Connected to localhost.
+Escape character is '^]'.
+GET /profile HTTP/1.0
 
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 181
+ETag: W/"b5-KZ+dCpUE8D2y8w8sSTFGI043wP0"
+Date: Fri, 08 May 2020 16:35:29 GMT
+Connection: close
+
+{"name":"Franklin Fowler","gender":"Male","pet":"Hedgehogs","email":"goc@fozazuko.nc","avatar":"https://www.gravatar.com/avatar/7a408e854b2687dfcc550f9f399f149a","hashtag":"#amapi"}
+Connection closed by foreign host.
 ```
 
-Then we build the image using `docker build -t res/express_students .` and we can run it as many times as we want using the `docker run res/express_students` command. We can see the welcome message. Every instance of the Docker container executes the script once, then the container is stopped.
+#### Browser
 
-We can also see the contents of the container by running it in interactive mode : `docker run -it res/express_students /bin/bash`. If we display the content of the `/opt/app` folder, we can see the following files :
+![](doc/express_browser.png)
 
-```
-index.js
-node_modules
-package.json
-```
+#### Postman
 
-### Using express.js framework
-
-To go a little further, instead of writing plumber code from scratch, we can use a web framework such as [**express.js**](https://expressjs.com/). The installation is fairly simple using the following command `npm i express --save`. 
-
-For now we will modify our app to be able to listen on a given port, and when a client connects return a list of variable length containing random students with their name and birthdate. 
-
-```javascript
-//index.js
-
-
-```
-
-### Using Postman to submit queries
-
+![](doc/express_postman.png)
