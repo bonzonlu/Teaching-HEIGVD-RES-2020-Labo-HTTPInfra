@@ -1,7 +1,16 @@
 FROM node:12.16.3
 
-COPY src /opt/app
+# create the directory for our cool app
+WORKDIR /opt/app
 
-RUN cd /opt/app && npm i
+# install the dependencies for our app
+## first copy `package.json` and `package-lock.json`
+COPY src/package*.json ./
+## then we can install the dependencies w/ npm
+RUN npm i
 
-CMD ["node", "/opt/app/index.js"]
+# bundle the app
+COPY src .
+
+# run the app
+CMD ["node", "index.js"]
