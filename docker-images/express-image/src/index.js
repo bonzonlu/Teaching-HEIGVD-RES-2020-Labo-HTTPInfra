@@ -5,43 +5,49 @@ const chance = new Chance();
 const app = express();
 
 app.get('/', (req, res) => {
-  res.send(generateStudents());
+  res.send("Welcome to our app!");
+});
+
+app.get('/hashtag', (req, res) => {
+  res.send(chance.hashtag());
+});
+
+app.get('/profile', (req, res) => {
+  res.send(generateProfile());
+});
+
+app.get('/profile/:count', (req, res) => {
+  res.send(generateProfiles(req.params.count));
 });
 
 app.listen(3000, () => {
   console.log('Accepting HTTP requests on port 3000.');
 });
 
-function generateStudents() {
-  const nbStudents = chance.integer({
-    min: 0,
-    max: 10,
-  });
+function generateProfile() {
+  const gender = chance.gender();
 
-  console.log(nbStudents);
-
-  let students = [];
-
-  for (let i = 0; i < nbStudents; ++i) {
-    let gender = chance.gender();
-    let bday = chance.year({
-      min: 1986,
-      max: 2000,
-    });
-
-    students.push({
-      firstName: chance.first({
-        gender: gender,
-      }),
-      lastName: chance.last(),
+  return {
+    name: chance.name({
       gender: gender,
-      birthday: chance.birthday({
-        year: bday,
-      }),
-    });
-  }
+    }),
+    gender: gender,
+    pet: chance.animal({
+      type: 'pet',
+    }),
+    email: chance.email(),
+    avatar: chance.avatar({
+      protocol: 'https'
+    }),
+    hashtag: chance.hashtag(),
+  };
+}
 
-  console.log(students);
+function generateProfiles(count) {
+  let profiles = [];
 
-  return students;
+  for (let i = 0; i < count; ++i)
+    profiles.push(generateProfile());
+
+  return profiles;
 }
