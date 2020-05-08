@@ -114,15 +114,35 @@ In this set we will write an HTTP app in Node.js capable of returning JSON paylo
 
 ```dockerfile
 FROM node:12.16.3
-COPY src/ /opt/app
-CMD ["node", "/opt/app/index.js"]
+
+# create the directory for our cool app
+WORKDIR /opt/app
+
+# install the dependencies for our app
+## first copy `package.json` and `package-lock.json`
+COPY src/package*.json ./
+## then we can install the dependencies w/ npm
+RUN npm i
+
+# bundle the app
+COPY src .
+
+# run the app
+CMD ["node", "index.js"]
+
 ```
 
 We've based our docker image on the official [**NodeJS**](https://hub.docker.com/_/node) image in version **12.16.3**.
 
-Then we've  configured our image to copy the contents of `src/` (our cool app) to `/opt/app` on the server.
+The first thing we do is create our server side working directory in `/opt/app` . Then we install the dependencies of our (cool) app by copying the `package.json` and `package-lock.json` to the server and then running `npm i` (this is a shortcut for `npm install`, since we're lazy, we've decided to use it :D).
 
-The last command will allow the `node /opt/app/index.js` command to be executed every time we run a container based on this image.
+Once the dependencies installed, we can copy our app to the server.
+
+And last but not least, we can run our app (which is very cool) using `node index.js`.
+
+Note: We've added a `.dockerignore` file to avoid copying the `node_modules` to the server. This is to prevent any issues if we've installed local modules that aren't needed for the app. This isn't the case here..but better be safe than sorry.
+
+[Source](https://nodejs.org/fr/docs/guides/nodejs-docker-webapp/)
 
 ### Usage
 
