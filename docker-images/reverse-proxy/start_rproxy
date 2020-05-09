@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+# start_rproxy - Starts all the services needed for the reverse proxy to work
+#
+# usage: start_rproxy
+#
+# Ludovic Bonzon & Doran Kayoumi
+
+static_name="static-http"
+dynamic_name="dynamic-http"
+
+# build the docker images
+docker build --tag res/apache_php ../apache-php-image
+docker build --tag res/express ../express-image
+
+# start the containers
+docker run -d --rm --name $static_name res/apache_php
+docker run -d --rm --name $dynamic_name res/express
+
+# setup reverse proxy vhosts
+res=$(./generate_vhost $static_name $dynamic_name)
+
+# build and start the reverse proxy
+docker build --tag res/reverse-proxy .
+docker run -d --rm -p 8080:80 --name reverse-proxy res/reverse-proxy
