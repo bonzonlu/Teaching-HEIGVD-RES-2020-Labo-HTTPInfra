@@ -260,11 +260,13 @@ This virtual host is the one that will be used for our reverse proxy. The first 
 
 Next we've configured 2 `ProxyPass`, one for the api and the second for the static website. Their purpose is to redirect the requests to the correct server. If they start by `/api/`, they'll will be redirected to the dynamic HTTP server otherwise, they'll be redirected to the static HTTP server.
 
-There's one big issue with this configuration. It's that we've "hard coded" the IP addresses of our servers. This is a problem because we do not know what addresses docker will give to our servers. To solve 
+There's one big issue with this configuration. It's that we've "hard coded" the IP addresses of our servers. This is a problem because we do not know what addresses docker will give to our servers. We found a fix that we'll explain in the Setup.
 
 ### Setup
 
-As we've stated above, there could be issues with the IP addresses of our servers. To solve these issues, we've created two scripts one that will generate the VirtualHost so you won't need to worry about that and the second to start up the proxy server (which uses the script the generate the VirtualHost). To start the reverse proxy:
+As we've stated above, there could be issues with the IP addresses of our servers. To solve these issues, we've created two scripts one that will generate the VirtualHost so you won't need to worry about that and the second to start up the proxy server (which uses the script the generate the VirtualHost). 
+
+To start the reverse proxy you can simply run the second script:
 
 ```bash
 ./run_rproxy
@@ -320,4 +322,6 @@ Connection: close
 ```
 
 #### Browser
+
+![](doc/rproxy_browser.png)
 
