@@ -1,3 +1,5 @@
+
+
 # Teaching-HEIGVD-RES-2020-Labo-HTTPInfra
 
 Students:
@@ -11,11 +13,9 @@ All of our work can be found on [this repo](https://github.com/bonzonlu/Teaching
 
 We've used two different work environments:
 
-![](doc/manjaro.png)
-
-
-
-![](doc/apple_master_race.jpg)
+|                                                              |                                                              |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| <img src="doc/btw_i_use_arch.png" alt="drawing" width="520"/> | <img src="doc/apple_master_race.jpg" alt="drawing" width="500"/> |
 
 ## Step 1 - Static HTTP server with apache httpd
 
@@ -94,11 +94,20 @@ Normally when a new site is added to the server you should create a new configur
 
 Since our server will only host one website, we've decided not to create a custom configuration file and just copy our website in the **DocumentRoot** set in the default config i.e. `/var/www/html`.
 
+### Setup
+
+We've created two scripts to help you setup the container.
+
+To start using our website, you'll need to run our scripts:
+
+```bash
+./build-image.sh
+./run-container.sh
+```
+
+You'll then be able to access the app on `localhost:9090`.
+
 ### Usage
-
-To build the image you can run the `build-image.sh` script. Then to run the container, execute `run-container.sh`.
-
-### Demo
 
 ![](doc/demo_step1.jpg)
 
@@ -201,3 +210,63 @@ Connection closed by foreign host.
 #### Postman
 
 ![](doc/express_postman.png)
+
+
+
+## Step 3: Reverse proxy with apache (static configuration)
+
+In this we're going to setup an apache reverse proxy. It's purpose is to sit between out HTTP servers and  external clients, forwarding client requests to the appropriate server.
+
+### Dockerfile
+
+```dockerfile
+FROM php:7.4.5-apache
+
+# copy our configurations to the server
+COPY conf/ /etc/apache2
+
+# enable the proxy modules & our sites
+RUN a2enmod proxy proxy_http
+RUN a2ensite 000-* 001-*
+```
+
+Our Dockerfile is pretty straight forward, the same as [step 1](#step-1---static-http-server-with-apache-httpd) we've based our docker image on the official [php](https://hub.docker.com/_/php) image with the **Apache** variant version **7.4.5**. Then we copied the virtual hosts we created for our reverse proxy. Finally, we enable the modules needed to use a proxy and our websites.
+
+#### Virtual hosts
+
+```
+# 000-default.conf
+<VirtualHost *:80>
+</VirtualHost>
+```
+
+We've setup an empty default virtual to restrict the access to our servers. By doing this, if someone tries to access our services without specifying the host defined in the reverse proxy virtual host, he'll be redirected to the default one and get an error message. 
+
+```
+# 001-reverse-proxy.conf
+<VirtualHost *:80>
+  ServerName res.summer-adventure.io
+
+  # API
+  ProxyPass "/api/" "http://172.17.0.3:3000/"
+  ProxyPassReverse "/api/" "http://172.17.0.3:3000/"
+
+  # Website
+  ProxyPass "/" "http://172.17.0.2/"
+  ProxyPassReverse "/" "http://172.17.0.2/"
+
+</VirtualHost>
+```
+
+This virtual host is the one that will be used for our reverse proxy. The first thing we did is specify a `ServerName` so that our server will only accept requests with that name set in the `Host` part of the HTTP header. 
+
+Next we've configured 2 `ProxyPass`, one for the api and the second for the static website. What these do is any requests containing `/api/` will be redirected to the dynamic HTTP server and the rest to the static HTTP server.
+
+There's one big issue with this configuration. It's that we've "hard coded" the IP addresses of our servers. This is a problem because we do not know what addresses docker will give to our servers.
+
+### Setup
+
+As we've stated above, there could be issues with the IP addresses of our servers. So what you need to do is first start the HTTP servers. You can follow our previous instructions [here]() and [here]().
+
+### Usage
+
