@@ -1,0 +1,52 @@
+#!/bin/bash
+#
+# generate_vhost - Generates the virtualhost config for the reverse proxy
+# Note: For this script to work, you need to start both HTTP servers (i.e. static and dynamic)
+#
+# usage: generate_vhost static dynamic
+#
+# Ludovic Bonzon & Doran Kayoumi
+
+function get_container_ip() {
+  docker inspect $1 | grep \"IPAddress\": | head -1 | tr -d " \t\"," | cut -f 2 -d ':'
+}
+
+# check the number of argument
+if [ "$#" -ne 2 ]; then
+    echo "Error : Incorrect number of arguments"
+    exit 1
+fi
+
+target_dir="conf/sites-available/001-reverse-proxy.conf"
+
+static_name=$1
+dynamic_name=$2
+
+# first thing we do is get the ip addresses of our servers (i.e containers)
+static_ip=$(get_container_ip $static_name)
+dynamic_ip=$(get_container_ip $dynamic_name)
+
+# generate the vhost
+vhost_opening_tag="<VirtualHost *:80>"
+vhost_servername="ServerName res.summer-adventure.io"
+
+vhost_dynamic_proxypass="ProxyPass \"/api/\" \"http://$dynamic_ip:3000/\""
+vhost_dynamic_rproxypass="ProxyPassReverse \"/api/\" \"http://$dynamic_ip:3000/\""
+
+vhost_static_proxypass="ProxyPass \"/\" \"http://$static_ip/\""
+vhost_static_rproxypass="ProxyPassReverse \"/\" \"http://$static_ip/\""
+
+vhost_closing_tag="</VirtualHost>"
+
+# write to the conf file
+echo $vhost_opening_tag > $target_dir
+echo $vhost_servername >> $target_dir
+
+echo $vhost_dynamic_proxypass >> $target_dir
+echo $vhost_dynamic_rproxypass >> $target_dir
+
+echo $vhost_static_proxypass >> $target_dir
+echo $vhost_static_rproxypass >> $target_dir
+
+echo $vhost_closing_tag >> $target_dir
+
