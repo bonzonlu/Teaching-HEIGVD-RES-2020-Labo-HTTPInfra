@@ -96,16 +96,14 @@ Since our server will only host one website, we've decided not to create a custo
 
 ### Setup
 
-We've created two scripts to help you setup the container.
-
-To start using our website, you'll need to run our scripts:
+To start using our website, you'll need to run the following:
 
 ```bash
-./build-image.sh
-./run-container.sh
+docker build --tag res/apache_php .
+docker run -d --rm -p 9090:80 --name summer-adventure-2020 res/apache_php
 ```
 
-You'll then be able to access the app on `localhost:9090`.
+You'll then be able to access the website on `localhost:9090`.
 
 ### Usage
 
@@ -230,7 +228,7 @@ RUN a2enmod proxy proxy_http
 RUN a2ensite 000-* 001-*
 ```
 
-Our Dockerfile is pretty straight forward, the same as [step 1](#step-1---static-http-server-with-apache-httpd) we've based our docker image on the official [php](https://hub.docker.com/_/php) image with the **Apache** variant version **7.4.5**. Then we copied the virtual hosts we created for our reverse proxy. Finally, we enable the modules needed to use a proxy and our websites.
+Our Dockerfile is pretty straight forward. Same as for [step 1](#step-1---static-http-server-with-apache-httpd), we've based our docker image on the official [php](https://hub.docker.com/_/php) image with the **Apache** variant version **7.4.5**. Then we copied the virtual hosts we created for our reverse proxy. Finally, we enable the modules needed to use a proxy and our websites.
 
 #### Virtual hosts
 
@@ -260,13 +258,66 @@ We've setup an empty default virtual to restrict the access to our servers. By d
 
 This virtual host is the one that will be used for our reverse proxy. The first thing we did is specify a `ServerName` so that our server will only accept requests with that name set in the `Host` part of the HTTP header. 
 
-Next we've configured 2 `ProxyPass`, one for the api and the second for the static website. What these do is any requests containing `/api/` will be redirected to the dynamic HTTP server and the rest to the static HTTP server.
+Next we've configured 2 `ProxyPass`, one for the api and the second for the static website. Their purpose is to redirect the requests to the correct server. If they start by `/api/`, they'll will be redirected to the dynamic HTTP server otherwise, they'll be redirected to the static HTTP server.
 
-There's one big issue with this configuration. It's that we've "hard coded" the IP addresses of our servers. This is a problem because we do not know what addresses docker will give to our servers.
+There's one big issue with this configuration. It's that we've "hard coded" the IP addresses of our servers. This is a problem because we do not know what addresses docker will give to our servers. To solve 
 
 ### Setup
 
-As we've stated above, there could be issues with the IP addresses of our servers. So what you need to do is first start the HTTP servers. You can follow our previous instructions [here]() and [here]().
+As we've stated above, there could be issues with the IP addresses of our servers. To solve these issues, we've created two scripts one that will generate the VirtualHost so you won't need to worry about that and the second to start up the proxy server (which uses the script the generate the VirtualHost). To start the reverse proxy:
+
+```bash
+./run_rproxy
+```
+
+And voila, you have the reverse proxy and both HTTP servers up and running.
+
+If you want to be able to use the services, you'll need update your `hosts` file and add the following
+
+> The location of the `hosts` file depends on your system:
+>
+> For UNIX based systems the file is located at `/etc/hosts`. 
+>
+> For Windows (why?) the is located at `C:\Windows\System32\drivers\etc\hosts`
+>
+> Note: You'll need to open the file with admin/root privileges
+
+```
+<ip> res.summer-adventure.io
+```
+
+The IP address you'll have to put depends on your system. If you are using Linux, you can directly put the IP of the docker container (). On Windows and MacOS, you'll need to put the IP address of the Docker virtual machine.
+
+You can now access the services at `res.summer-adventure.io`.
 
 ### Usage
+
+To access the dynamic server, you'll need to add `/api/` to your requests. 
+E.g. res.summer-adventure.io/api/hashtags/
+
+#### Telnet
+
+```bash
+$ telnet localhost 8080
+Trying ::1...
+Connected to localhost.
+Escape character is '^]'.
+GET /profile HTTP/1.0
+
+GET /api/hashtag HTTP/1.0
+Host: res.summer-adventure.io
+
+HTTP/1.1 200 OK
+Date: Sat, 09 May 2020 15:17:57 GMT
+Server: Apache/2.4.38 (Debian)
+X-Powered-By: Express
+Content-Type: text/html; charset=utf-8
+Content-Length: 3
+ETag: W/"3-eAlk7ARQltRrcHu3KndCCIaNG2M"
+Connection: close
+
+#ju
+```
+
+#### Browser
 
