@@ -269,8 +269,9 @@ As we've stated above, there could be issues with the IP addresses of our server
 To start the reverse proxy you can simply run the second script:
 
 ```bash
-./run_rproxy
+./start_rproxy
 ```
+> Note: You need to be in the same directory as **start_proxy** and keep our directory strucure for it to work
 
 And voila, you have the reverse proxy and both HTTP servers up and running.
 
