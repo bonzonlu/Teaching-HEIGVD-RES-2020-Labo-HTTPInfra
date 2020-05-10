@@ -327,3 +327,41 @@ Connection: close
 
 ![](doc/rproxy_browser.png)
 
+
+
+## Step 4: AJAX requests
+
+In this step. we're going to create a javascript script to fetch `hashtags` from our api with **AJAX**.  We opted **not** to use JQuery because plain old JavaScript has evolved so much that it is now very easy to make AJAX queries and interact with the DOM. 
+
+> Note: Nowadays, web apps are developed using frontend frameworks such as Vue.Js (:heart:), React and Angular.
+
+```javascript
+// docker-images/apache-php-image/content/js/app.js
+
+// get the div where the hastag will be written
+const target = document.getElementById('hashtag');
+
+// fetch the first hashtag
+fetchHashtag();
+// update it every 3 seconds
+setInterval(fetchHashtag, 3000);
+
+/**
+ * Fetch a hashtag from the api
+ */
+function fetchHashtag() {
+  fetch("/api/hashtag/")
+    // convert the response to json
+    .then((res) => res.json())
+    .then((data) => {
+      target.innerHTML = data;
+    })
+    .catch(() => {
+      console.log("API unreachable");
+    });
+}
+```
+
+Every 3 seconds, a `GET` request is made to the API to get a new hashtag and update the DOM.
+
+![](doc/ajax.jpg)
