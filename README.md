@@ -49,10 +49,10 @@ sites-available
 sites-enabled
 ```
 
-- **apache2.conf**: This is the main configuration file  for the server. 
-- **ports.conf**: This file is used to specify the ports that virtual hosts should listen on. 
-- **conf.d/**: This directory is used for controlling  specific aspects of the Apache configuration. 
-- **sites-available/**: This directory contains all of  the virtual host files that define different web sites.  These will  establish which content gets served for which requests.  
+- **apache2.conf**: This is the main configuration file  for the server.
+- **ports.conf**: This file is used to specify the ports that virtual hosts should listen on.
+- **conf.d/**: This directory is used for controlling  specific aspects of the Apache configuration.
+- **sites-available/**: This directory contains all of  the virtual host files that define different web sites.  These will  establish which content gets served for which requests.
 - **sites-enabled/**: This directory establishes which  virtual host definitions are actually being used.  This directory consists of symbolic links to files defined in the "sites-available" directory.
 - **mods-[enabled,available]/**: These directories are  similar in function to the sites directories, but they define modules  that can be optionally loaded instead.
 
@@ -90,7 +90,7 @@ In the **sites-available** folder we can find the default Virtual host configura
 </VirtualHost>
 ```
 
-Normally when a new site is added to the server you should create a new configuration file and then create a symbolic link in **sites-available** so that the website will be served by the web server. 
+Normally when a new site is added to the server you should create a new configuration file and then create a symbolic link in **sites-available** so that the website will be served by the web server.
 
 Since our server will only host one website, we've decided not to create a custom configuration file and just copy our website in the **DocumentRoot** set in the default config i.e. `/var/www/html`.
 
@@ -164,11 +164,11 @@ You'll then be able to access the app on `localhost:9090`. Pretty cool right?
 
 >Note: If you decided to improve our application (btw thank you) you'll need to rebuild the image and create a new container (i.e. you'll have to rerun the above commands :/).
 
-### Application 
+### Application
 
 For our application we've used the minimalist yet awesome framework [express.js](https://expressjs.com/) and the amazing [Chance.js](https://chancejs.com/index.html) librairie.  Our app will generate random user profiles and hashtags and return them in the json format.
 
-You can can generate them using the following `GET` routes: 
+You can can generate them using the following `GET` routes:
 
 * `/hashtag`
 * `/profile`
@@ -238,7 +238,7 @@ Our Dockerfile is pretty straight forward. Same as for [step 1](#step-1---static
 </VirtualHost>
 ```
 
-We've setup an empty default virtual to restrict the access to our servers. By doing this, if someone tries to access our services without specifying the host defined in the reverse proxy virtual host, he'll be redirected to the default one and get an error message. 
+We've setup an empty default virtual to restrict the access to our servers. By doing this, if someone tries to access our services without specifying the host defined in the reverse proxy virtual host, he'll be redirected to the default one and get an error message.
 
 ```
 # 001-reverse-proxy.conf
@@ -256,7 +256,7 @@ We've setup an empty default virtual to restrict the access to our servers. By d
 </VirtualHost>
 ```
 
-This virtual host is the one that will be used for our reverse proxy. The first thing we did is specify a `ServerName` so that our server will only accept requests with that name set in the `Host` part of the HTTP header. 
+This virtual host is the one that will be used for our reverse proxy. The first thing we did is specify a `ServerName` so that our server will only accept requests with that name set in the `Host` part of the HTTP header.
 
 Next we've configured 2 `ProxyPass`, one for the api and the second for the static website. Their purpose is to redirect the requests to the correct server. If they start by `/api/`, they'll will be redirected to the dynamic HTTP server otherwise, they'll be redirected to the static HTTP server.
 
@@ -264,7 +264,7 @@ There's one big issue with this configuration. It's that we've "hard coded" the 
 
 ### Setup
 
-As we've stated above, there could be issues with the IP addresses of our servers. To solve these issues, we've created two scripts one that will generate the VirtualHost so you won't need to worry about that and the second to start up the proxy server (which uses the script the generate the VirtualHost). 
+As we've stated above, there could be issues with the IP addresses of our servers. To solve these issues, we've created two scripts one that will generate the VirtualHost so you won't need to worry about that and the second to start up the proxy server (which uses the script the generate the VirtualHost).
 
 To start the reverse proxy you can simply run the second script:
 
@@ -278,7 +278,7 @@ If you want to be able to use the services, you'll need update your `hosts` file
 
 > The location of the `hosts` file depends on your system:
 >
-> For UNIX based systems the file is located at `/etc/hosts`. 
+> For UNIX based systems the file is located at `/etc/hosts`.
 >
 > For Windows (why?) the is located at `C:\Windows\System32\drivers\etc\hosts`
 >
@@ -288,13 +288,13 @@ If you want to be able to use the services, you'll need update your `hosts` file
 <ip> res.summer-adventure.io
 ```
 
-The IP address you'll have to put depends on your system. If you are using Linux, you can directly put the IP of the docker container (). On Windows and MacOS, you'll need to put the IP address of the Docker virtual machine.
+The IP address you'll have to put depends on your system. If you are using Linux, you can simply put `127.0.0.1`. On Windows and MacOS, you'll need to put the IP address of the Docker virtual machine.
 
 You can now access the services at `res.summer-adventure.io`.
 
 ### Usage
 
-To access the dynamic server, you'll need to add `/api/` to your requests. 
+To access the dynamic server, you'll need to add `/api/` to your requests.
 E.g. res.summer-adventure.io/api/hashtags/
 
 #### Telnet
