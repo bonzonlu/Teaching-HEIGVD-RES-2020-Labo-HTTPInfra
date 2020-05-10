@@ -11,9 +11,7 @@ setInterval(fetchHashtag, 3000);
 function fetchHashtag() {
   fetch("/api/hashtag/")
     // convert the response to json
-    .then((res) => {
-      return res.json();
-    })
+    .then((res) => res.json())
     .then((data) => {
       target.innerHTML = data;
     })
