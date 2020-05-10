@@ -99,7 +99,7 @@ To start using our website, you'll need to run the following:
 
 ```bash
 docker build --tag res/apache_php .
-docker run -d --rm -p 9090:80 --name summer-adventure-2020 res/apache_php
+docker run -d --rm -p 9090:80 --name static-http res/apache_php
 ```
 
 You'll then be able to access the website on `localhost:9090`.
@@ -156,16 +156,16 @@ To start using our app (or improve it), you'll need to run the following command
 
 ```bash
 docker build -t res/express .
-docker run -d -p 9090:3000 res/express
+docker run -d -p 9090:3000 --name dynamic-http res/express
 ```
 
 You'll then be able to access the app on `localhost:9090`. Pretty cool right?
 
->Note: If you decided to improve our application (btw thank you) you'll need to rebuild the image and create a new container (i.e. you'll have to rerun the above commands :/).
+>Note: If you decided to improve our application (btw thank you) you'll need to rebuild the image and create a new container (i.e. you'll have to rerun the above commands :sweat:).
 
 ### Application
 
-For our application we've used the minimalist yet awesome framework [express.js](https://expressjs.com/) and the amazing [Chance.js](https://chancejs.com/index.html) library.  Our app will generate random user profiles and hashtags and return them in the JSON format.
+For our application we've used the minimalist yet awesome framework [express.js](https://expressjs.com/) and the [Chance.js](https://chancejs.com/index.html) library.  Our app will generate random user profiles and hashtags and return them in the JSON format.
 
 You can can generate them using the following `GET` routes:
 
@@ -259,18 +259,32 @@ This virtual host is the one that will be used for our reverse proxy. The first 
 
 Next we've configured 2 `ProxyPass`, one for the api and the second for the static website. Their purpose is to redirect the requests to the correct server. If they start by `/api/`, they'll will be redirected to the dynamic HTTP server otherwise, they'll be redirected to the static HTTP server.
 
-> Note: There's one big issue with this configuration. It's that we've "hard coded" the IP addresses of our servers. This is a problem because we do not know what addresses docker will give to our servers. We found a fix that we'll explain in the Setup.
+> Note: There's one big issue with this configuration. It's that we've "hard coded" the IP addresses of our servers. This is a problem because we do not know what addresses docker will give to our servers. 
 
 ### Setup
 
-As we've stated above, there could be issues with the IP addresses of our servers. To solve these issues, we've created two scripts one that will generate the VirtualHost so you won't need to worry about that and the second to start up the proxy server (which uses the script the generate the VirtualHost).
+As we've stated above, there could be an issue with the IP addresses since they're hardcoded :flushed:. Before running the reverse proxy, you'll need to have both HTTP servers up and running before hand. You can follow their respective setup instructions [here](#setup) and [here](#setup-1).
 
-To start the reverse proxy you can simply run the second script:
+> Note: You don't need to do any port forwarding.
+
+Next, you'll need to check the IP addresses of both containers and if need be, edit the reverse proxy configuration.
 
 ```bash
-./start_rproxy
+docker inspect static-http | grep IPA
+docker inspect dynamic-http | grep IPA
 ```
-> Note: You need to be in the same directory as **start_proxy** and keep our directory strucure for it to work
+
+If you have a big sad moment and the IP addresses aren't the same as the ones we've configured, you'll have to edit the reverse proxy configuration (`001-reverse-proxy.conf`) and change the IP addresses.
+
+> Note: You'll have to copy the content of `example-reverse-proxy.conf` in `001-reverse-proxy.conf`. The files can can be found here:
+> docker-images/reverse-proxy/conf/sites-available
+
+Once you have the configuration files sorted, all that is left to do is build and run the reverse proxy. You can run the following:
+
+```bash
+docker build --tag res/reverse-proxy .
+docker run -d --rm -p 8080:80 --name reverse-proxy res/reverse-proxy
+```
 
 And voila, you have the reverse proxy and both HTTP servers up and running.
 
@@ -282,8 +296,6 @@ If you want to be able to use the services, you'll need update your `hosts` file
 >
 > * For Windows (why?) the is located at `C:\Windows\System32\drivers\etc\hosts`
 >
-> 
->
 > Note: You'll need to open the file with admin/root privileges
 
 ```
@@ -293,6 +305,72 @@ If you want to be able to use the services, you'll need update your `hosts` file
 The value of **<ip>** depends on your system. If you are using Linux, you can simply put `127.0.0.1`. On Windows and MacOS, you'll need to put the IP address of the Docker virtual machine.
 
 You can now access the services at `res.summer-adventure.io`.
+
+#### Possible improvements
+
+As we've stated above, there could be issues with the IP addresses of our servers. To solve these issues, we've created scripts to generate the VirtualHost so you won't need to worry does pesky IP addresses and to start up the proxy server.
+
+To start the reverse proxy you can simply run:
+
+```bash
+./start_rproxy
+```
+
+> Note: You need to be in the same directory as **start_proxy** and keep our directory structure for it to work
+
+Same as before, you'll need to update the hosts file.
+
+
+
+An even better solution, would be to use [docker-compose](https://docs.docker.com/compose/) to manage our containers. 
+
+We'll start by defining our services in a `docker-compose.yml` file.
+
+```yaml
+version: "3.8"
+services:
+  static-http:
+    build: ./docker-images/apache-php-image/
+    container_name: static-http
+
+  dynamic-http:
+    build: ./docker-images/express-image/
+    container_name: dynamic-http
+
+  reverse-proxy:
+    build: ./docker-images/reverse-proxy
+    container_name: reverse-proxy
+    ports:
+      - 8080:80
+```
+
+Then in the reverse proxy virtualhost, the IP addresses can be replaced with the name of the services. Like this:
+
+> Note: You can to copy the content of `example-compose-reverse-proxy.conf` in `001-reverse-proxy.conf`. 
+
+```
+<VirtualHost *:80>
+  ServerName res.summer-adventure.io
+
+  # API
+  ProxyPass "/api/" "http://dynamic-http:3000/"
+  ProxyPassReverse "/api/" "http://dynamic-http:3000/"
+
+  # Website
+  ProxyPass "/" "http://static-http/"
+  ProxyPassReverse "/" "http://static-http/"
+</VirtualHost>
+```
+
+To startup everything, simply run the following:
+
+> Note: You need to be in the same directory as the `docker-compose.yml` file.
+
+```bash
+docker-compose run -d
+```
+
+And again, you'll need to update the hosts file.
 
 ### Usage
 
