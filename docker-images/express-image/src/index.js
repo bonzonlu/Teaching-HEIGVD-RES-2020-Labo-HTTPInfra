@@ -9,15 +9,15 @@ app.get('/', (req, res) => {
 });
 
 app.get('/hashtag', (req, res) => {
-  res.send(chance.hashtag());
+  res.json(chance.hashtag());
 });
 
 app.get('/profile', (req, res) => {
-  res.send(generateProfile());
+  res.json(generateProfile());
 });
 
 app.get('/profile/:count', (req, res) => {
-  res.send(generateProfiles(req.params.count));
+  res.json(generateProfiles(req.params.count));
 });
 
 app.listen(3000, () => {
