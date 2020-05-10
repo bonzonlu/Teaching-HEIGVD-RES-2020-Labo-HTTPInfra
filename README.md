@@ -165,7 +165,7 @@ You'll then be able to access the app on `localhost:9090`. Pretty cool right?
 
 ### Application
 
-For our application we've used the minimalist yet awesome framework [express.js](https://expressjs.com/) and the amazing [Chance.js](https://chancejs.com/index.html) librairie.  Our app will generate random user profiles and hashtags and return them in the json format.
+For our application we've used the minimalist yet awesome framework [express.js](https://expressjs.com/) and the amazing [Chance.js](https://chancejs.com/index.html) library.  Our app will generate random user profiles and hashtags and return them in the JSON format.
 
 You can can generate them using the following `GET` routes:
 
@@ -212,7 +212,7 @@ Connection closed by foreign host.
 
 ## Step 3: Reverse proxy with apache (static configuration)
 
-In this we're going to setup an apache reverse proxy. It's purpose is to sit between out HTTP servers and  external clients, forwarding client requests to the appropriate server.
+In this step we're going to setup an apache reverse proxy. It's purpose is to sit between out HTTP servers and  external clients, forwarding client requests to the appropriate server.
 
 ### Dockerfile
 
@@ -259,7 +259,7 @@ This virtual host is the one that will be used for our reverse proxy. The first 
 
 Next we've configured 2 `ProxyPass`, one for the api and the second for the static website. Their purpose is to redirect the requests to the correct server. If they start by `/api/`, they'll will be redirected to the dynamic HTTP server otherwise, they'll be redirected to the static HTTP server.
 
-There's one big issue with this configuration. It's that we've "hard coded" the IP addresses of our servers. This is a problem because we do not know what addresses docker will give to our servers. We found a fix that we'll explain in the Setup.
+> Note: There's one big issue with this configuration. It's that we've "hard coded" the IP addresses of our servers. This is a problem because we do not know what addresses docker will give to our servers. We found a fix that we'll explain in the Setup.
 
 ### Setup
 
@@ -274,13 +274,15 @@ To start the reverse proxy you can simply run the second script:
 
 And voila, you have the reverse proxy and both HTTP servers up and running.
 
-If you want to be able to use the services, you'll need update your `hosts` file and add the following
+If you want to be able to use the services, you'll need update your `hosts` file and add the following:
 
 > The location of the `hosts` file depends on your system:
 >
-> For UNIX based systems the file is located at `/etc/hosts`.
+> * For UNIX based systems the file is located at `/etc/hosts`.
 >
-> For Windows (why?) the is located at `C:\Windows\System32\drivers\etc\hosts`
+> * For Windows (why?) the is located at `C:\Windows\System32\drivers\etc\hosts`
+>
+> 
 >
 > Note: You'll need to open the file with admin/root privileges
 
@@ -288,14 +290,14 @@ If you want to be able to use the services, you'll need update your `hosts` file
 <ip> res.summer-adventure.io
 ```
 
-The IP address you'll have to put depends on your system. If you are using Linux, you can simply put `127.0.0.1`. On Windows and MacOS, you'll need to put the IP address of the Docker virtual machine.
+The value of **<ip>** depends on your system. If you are using Linux, you can simply put `127.0.0.1`. On Windows and MacOS, you'll need to put the IP address of the Docker virtual machine.
 
 You can now access the services at `res.summer-adventure.io`.
 
 ### Usage
 
 To access the dynamic server, you'll need to add `/api/` to your requests.
-E.g. res.summer-adventure.io/api/hashtags/
+E.g. `res.summer-adventure.io/api/hashtags/`
 
 #### Telnet
 
