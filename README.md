@@ -2,10 +2,9 @@
 
 # Teaching-HEIGVD-RES-2020-Labo-HTTPInfra
 
-Students:
-
-* Bonzon Ludovic
-* Kayoumi Doran
+> Students: Bonzon Ludovic & Kayoumi Doran
+>
+> Date: 01.05.2020
 
 All of our work can be found on [this repo](https://github.com/bonzonlu/Teaching-HEIGVD-RES-2020-Labo-HTTPInfra/tree/fb-apache-static)
 
