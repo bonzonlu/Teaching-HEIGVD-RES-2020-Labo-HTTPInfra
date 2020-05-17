@@ -29,7 +29,7 @@ COPY content/ /var/www/html/
 
 We've based our docker image on the official [php](https://hub.docker.com/_/php) image with the **Apache** variant version **7.4.5**. We could have directly used Apache [official](https://hub.docker.com/_/httpd) image, but since we'll be needing php in further steps, we've decided to use php since it comes with an Apache server already configured.
 
-Then we've  configured our image to copy the contents of `content/` (our cool website) to `/var/www/html` on the server.
+Then we've configured our image to copy the contents of `content/` (our cool website) to `/var/www/html` on the server.
 
 ### Apache configuration
 
@@ -48,12 +48,12 @@ sites-available
 sites-enabled
 ```
 
-- **apache2.conf**: This is the main configuration file  for the server.
+- **apache2.conf**: This is the main configuration file for the server.
 - **ports.conf**: This file is used to specify the ports that virtual hosts should listen on.
-- **conf.d/**: This directory is used for controlling  specific aspects of the Apache configuration.
-- **sites-available/**: This directory contains all of  the virtual host files that define different web sites.  These will  establish which content gets served for which requests.
-- **sites-enabled/**: This directory establishes which  virtual host definitions are actually being used.  This directory consists of symbolic links to files defined in the "sites-available" directory.
-- **mods-[enabled,available]/**: These directories are  similar in function to the sites directories, but they define modules  that can be optionally loaded instead.
+- **conf.d/**: This directory is used for controlling specific aspects of the Apache configuration.
+- **sites-available/**: This directory contains all of the virtual host files that define different web sites. These will establish which content gets served for which requests.
+- **sites-enabled/**: This directory establishes which virtual host definitions are actually being used. This directory consists of symbolic links to files defined in the "sites-available" directory.
+- **mods-[enabled,available]/**: These directories are similar in function to the sites directories, but they define modules that can be optionally loaded instead.
 
 In the **sites-available** folder we can find the default Virtual host configuration.
 
@@ -165,7 +165,7 @@ You'll then be able to access the app on `localhost:9090`. Pretty cool right?
 
 ### Application
 
-For our application we've used the minimalist yet awesome framework [express.js](https://expressjs.com/) and the [Chance.js](https://chancejs.com/index.html) library.  Our app will generate random user profiles and hashtags and return them in the JSON format.
+For our application we've used the minimalist yet awesome framework [express.js](https://expressjs.com/) and the [Chance.js](https://chancejs.com/index.html) library. Our app will generate random user profiles and hashtags and return them in the JSON format.
 
 You can can generate them using the following `GET` routes:
 
@@ -212,7 +212,7 @@ Connection closed by foreign host.
 
 ## Step 3: Reverse proxy with apache (static configuration)
 
-In this step we're going to setup an apache reverse proxy. It's purpose is to sit between out HTTP servers and  external clients, forwarding client requests to the appropriate server.
+In this step we're going to setup an apache reverse proxy. It's purpose is to sit between out HTTP servers and external clients, forwarding client requests to the appropriate server.
 
 ### Dockerfile
 
@@ -367,7 +367,7 @@ To startup everything, simply run the following:
 > Note: You need to be in the same directory as the `docker-compose.yml` file.
 
 ```bash
-docker-compose run -d
+docker-compose up -d
 ```
 
 And again, you'll need to update the hosts file.
@@ -409,7 +409,7 @@ Connection: close
 
 ## Step 4: AJAX requests
 
-In this step. we're going to create a javascript script to fetch `hashtags` from our api with **AJAX**.  We opted **not** to use JQuery because plain old JavaScript has evolved so much that it is now very easy to make AJAX queries and interact with the DOM. 
+In this step. we're going to create a javascript script to fetch `hashtags` from our api with **AJAX**. We opted **not** to use JQuery because plain old JavaScript has evolved so much that it is now very easy to make AJAX queries and interact with the DOM. 
 
 > Note: Nowadays, web apps are developed using frontend frameworks such as Vue.Js (:heart:), React and Angular.
 
@@ -443,3 +443,132 @@ function fetchHashtag() {
 Every 3 seconds, a `GET` request is made to the API to get a new hashtag and update the DOM.
 
 ![](doc/ajax.jpg)
+
+
+
+## Step 5: Dynamic reverse proxy configuration
+
+For this step, we will deviate from the webcasts, follow our own path and use a cool tool called [Traefik](https://docs.traefik.io/) which is (as described in their own terms) an open-source Edge Router that makes publishing our services a fun and easy experience. It is also natively compliant with Docker. We will reuse the Docker containers created in [step 3](#Step 3: Reverse proxy with apache (static configuration)) but avoid the hassle of hardcoding manual IP adresses or creating scripts.
+
+### Setup
+
+As stated in the [possible improvements section in step 3](#Possible improvements), Docker-compose is the tool we're going to use, and it is built in MacOS Docker Desktop.
+
+So first off we are going to create a simple `docker-compose.yml` file listing our services:
+
+```yaml
+# docker-compose.yml
+version: "3.8"
+services:
+  static-http:
+    build: ../apache-php-image/
+
+  dynamic-http:
+    build: ../express-image/
+
+  reverse-proxy:
+    ports:
+      - 80:80
+      - 8080:8080
+```
+
+We declare two services `static-http` for our cool website and `dynamic-http` for our also cool random generator apps, and set up a few ports for our `reverse proxy`. And then we add the Traefik magic in the same file :
+
+```yml
+# docker-compose.yml
+version: "3.8"
+services:
+  static-http:
+    build: ../apache-php-image/
+    labels:
+    		# Enables the service in Traefik
+        - "traefik.enable=true"
+        # Sets the port to 80 for this service
+        - "traefik.port=80"
+        # Allows connection via the url "res.summer-adventure.io"
+        - "traefik.http.routers.static-http.rule=Host(`res.summer-adventure.io`)"
+        # Sets the entrypoint to the one declared later on
+        - "traefik.http.routers.static-http.entrypoints=web"
+
+  dynamic-http:
+    build: ../express-image/
+    labels:
+        - "traefik.enable=true"
+        # We add the PathPrefix so our generators apps are accessible at the "res.summer-adventure.io/api" url
+        - "traefik.http.routers.dynamic-http.rule=Host(`res.summer-adventure.io`) && PathPrefix(`/api`)"
+        # Removes the specified prefix "/api" from the URL path
+        - "traefik.http.routers.dynamic-http.middlewares=strip-prefix"
+        - "traefik.http.middlewares.strip-prefix.stripprefix.prefixes=/api"
+         # Enables load balancing on port 3000 for the dynamic-http service
+        - "traefik.http.services.dynamic-http.loadbalancer.server.port=3000"
+
+  reverse-proxy:
+   	# Uses the official Traefik Docker image
+    image: traefik
+    ports:
+    	# The HTTP port
+      - 80:80
+      # The Web UI (enabled by --api.insecure=true)
+      - 8080:8080
+    command:
+    		# Enables the web UI
+        - "--api.insecure=true"
+        # Tells Traefik to listen to Docker
+        - "--providers.docker"
+        # Defines an entrypoint "web" listening on port 80
+        - "--entrypoints.web.address=:80"
+        # Ignores non-enabled services (with the "traefik.enable=true" rule)
+        - "--providers.docker.exposedbydefault=false"
+    volumes:
+    # So that Traefik can listen to the Docker events
+    - /var/run/docker.sock:/var/run/docker.sock
+```
+
+So now our Traefik router is configured, we can now run it using the following command :
+
+```bash
+docker-compose up -d
+```
+
+### Usage
+
+Traefik offers a built-in dashboard with a lot of useful informations on entrypoints, routers, services, middlewares for HTTP, TCP and UDP protocols. The page is accessible on the `8080` port, so if we type in `res.summer-adventure.io:8080` in our favourite web browser, we land on the following (dark themed ftw🖤) page :
+
+![traefik_dashboard](/Users/ludovicbonzon/HEIG-VD/20-A/RES/labos/04-HTTPInfra/doc/traefik_dashboard.png)
+
+Our super duper website is now accessible at `res.summer-adventure.io` and our top notch apps at `res.summer-adventure.io/api`
+
+> Reminder : existing apps are /hashtag, /profile and /profile/\<count> 
+
+![traefik_home](/Users/ludovicbonzon/HEIG-VD/20-A/RES/labos/04-HTTPInfra/doc/traefik_home.png)
+
+Shaun 🐑 is still here ! 
+
+![traefik_profile](/Users/ludovicbonzon/HEIG-VD/20-A/RES/labos/04-HTTPInfra/doc/traefik_profile.png)
+
+And so is Donald Young !
+
+
+
+## Additional 1 - Load balancing: multiple server nodes
+
+A cool feature that is built in Traefik is the ability to make load balancing when multiple instances of a same container (nodes) are run simultaneously. By using the following command we can tell Traefik to run a defined amount of services and [load balancing](https://docs.traefik.io/getting-started/quick-start/#more-instances-traefik-load-balances-them) will be automatically set up using a [Round Robin](https://docs.traefik.io/routing/services/#load-balancing) implementation.
+
+```
+docker-compose up --scale static-http=2 --scale dynamic-http=3
+```
+
+We immediately see the result of the command :
+
+![docker-compose_load_balancing](/Users/ludovicbonzon/HEIG-VD/20-A/RES/labos/04-HTTPInfra/doc/docker-compose_load_balancing.png)
+
+And in the dashboard interface that we have 2 servers/nodes dedicated to handle static requests and 3 servers/nodes for the dynamic ones :
+
+![traefik_dashboard_load_balancing](/Users/ludovicbonzon/HEIG-VD/20-A/RES/labos/04-HTTPInfra/doc/traefik_dashboard_load_balancing.png)
+
+Below is a list of the servers IP addresses and Ports for both services :
+
+| Static HTTP service                                          | Dynamic HTTP service                                         |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ![traefik_static_servers](/Users/ludovicbonzon/HEIG-VD/20-A/RES/labos/04-HTTPInfra/doc/traefik_static_servers.png) | ![traefik_dynamic_servers](/Users/ludovicbonzon/HEIG-VD/20-A/RES/labos/04-HTTPInfra/doc/traefik_dynamic_servers.png) |
+

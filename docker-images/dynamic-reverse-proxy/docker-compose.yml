@@ -2,7 +2,6 @@ version: "3.8"
 services:
   static-http:
     build: ../apache-php-image/
-    container_name: static-http
     labels:
         - "traefik.enable=true"
         - "traefik.port=80"
@@ -11,7 +10,6 @@ services:
 
   dynamic-http:
     build: ../express-image/
-    container_name: dynamic-http
     labels:
         - "traefik.enable=true"
         - "traefik.http.routers.dynamic-http.rule=Host(`res.summer-adventure.io`) && PathPrefix(`/api`)"
@@ -21,7 +19,6 @@ services:
 
   reverse-proxy:
     image: traefik
-    container_name: dynamic-proxy
     ports:
       - 80:80
       - 8080:8080
