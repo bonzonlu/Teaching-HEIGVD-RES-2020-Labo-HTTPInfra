@@ -481,7 +481,7 @@ services:
   static-http:
     build: ../apache-php-image/
     labels:
-    		# Enables the service in Traefik
+    	  # Enables the service in Traefik
         - "traefik.enable=true"
         # Sets the port to 80 for this service
         - "traefik.port=80"
@@ -503,7 +503,7 @@ services:
         - "traefik.http.services.dynamic-http.loadbalancer.server.port=3000"
 
   reverse-proxy:
-   	# Uses the official Traefik Docker image
+  	# Uses the official Traefik Docker image
     image: traefik
     ports:
     	# The HTTP port
@@ -534,17 +534,17 @@ docker-compose up -d
 
 Traefik offers a built-in dashboard with a lot of useful informations on entrypoints, routers, services, middlewares for HTTP, TCP and UDP protocols. The page is accessible on the `8080` port, so if we type in `res.summer-adventure.io:8080` in our favourite web browser, we land on the following (dark themed ftw🖤) page :
 
-![traefik_dashboard](/Users/ludovicbonzon/HEIG-VD/20-A/RES/labos/04-HTTPInfra/doc/traefik_dashboard.png)
+![traefik_dashboard](doc/traefik_dashboard.png)
 
 Our super duper website is now accessible at `res.summer-adventure.io` and our top notch apps at `res.summer-adventure.io/api`
 
 > Reminder : existing apps are /hashtag, /profile and /profile/\<count> 
 
-![traefik_home](/Users/ludovicbonzon/HEIG-VD/20-A/RES/labos/04-HTTPInfra/doc/traefik_home.png)
+![traefik_home](doc/traefik_home.png)
 
 Shaun 🐑 is still here ! 
 
-![traefik_profile](/Users/ludovicbonzon/HEIG-VD/20-A/RES/labos/04-HTTPInfra/doc/traefik_profile.png)
+![traefik_profile](doc/traefik_profile.png)
 
 And so is Donald Young !
 
@@ -560,15 +560,15 @@ docker-compose up --scale static-http=2 --scale dynamic-http=3
 
 We immediately see the result of the command :
 
-![docker-compose_load_balancing](/Users/ludovicbonzon/HEIG-VD/20-A/RES/labos/04-HTTPInfra/doc/docker-compose_load_balancing.png)
+![docker-compose_load_balancing](doc/docker-compose_load_balancing.png)
 
 And in the dashboard interface that we have 2 servers/nodes dedicated to handle static requests and 3 servers/nodes for the dynamic ones :
 
-![traefik_dashboard_load_balancing](/Users/ludovicbonzon/HEIG-VD/20-A/RES/labos/04-HTTPInfra/doc/traefik_dashboard_load_balancing.png)
+![traefik_dashboard_load_balancing](doc/traefik_dashboard_load_balancing.png)
 
 Below is a list of the servers IP addresses and Ports for both services :
 
-| Static HTTP service                                          | Dynamic HTTP service                                         |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| ![traefik_static_servers](/Users/ludovicbonzon/HEIG-VD/20-A/RES/labos/04-HTTPInfra/doc/traefik_static_servers.png) | ![traefik_dynamic_servers](/Users/ludovicbonzon/HEIG-VD/20-A/RES/labos/04-HTTPInfra/doc/traefik_dynamic_servers.png) |
+| Static HTTP service                                       | Dynamic HTTP service                                        |
+| --------------------------------------------------------- | ----------------------------------------------------------- |
+| ![traefik_static_servers](doc/traefik_static_servers.png) | ![traefik_dynamic_servers](doc/traefik_dynamic_servers.png) |
 
