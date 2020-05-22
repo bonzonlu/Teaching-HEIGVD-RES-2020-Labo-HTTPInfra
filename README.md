@@ -532,13 +532,17 @@ docker-compose up -d
 
 ### Usage
 
-Traefik offers a built-in dashboard with a lot of useful informations on entrypoints, routers, services, middlewares for HTTP, TCP and UDP protocols. The page is accessible on the `8080` port, so if we type in `res.summer-adventure.io:8080` in our favourite web browser, we land on the following (dark themed ftw🖤) page :
+Traefik offers a built-in dashboard with a lot of useful informations on entrypoints, routers, services, middlewares for HTTP, TCP and UDP protocols. The page is accessible on the `8080` port, so if we type in `res.summer-adventure.io:8080` in our favourite web browser, we land on the following (dark themed ftw :heart:) page :
 
 ![traefik_dashboard](doc/traefik_dashboard.png)
 
-Our super duper website is now accessible at `res.summer-adventure.io` and our top notch apps at `res.summer-adventure.io/api`
+Our super duper website is now accessible at `res.summer-adventure.io` and our top notch api at `res.summer-adventure.io/api`
 
-> Reminder : existing apps are /hashtag, /profile and /profile/\<count> 
+> Reminder: Existing entry point of our api are:
+>
+> * /hashtag
+> * /profile
+> * /profile/:count
 
 ![traefik_home](doc/traefik_home.png)
 
@@ -571,4 +575,12 @@ Below is a list of the servers IP addresses and Ports for both services :
 | Static HTTP service                                       | Dynamic HTTP service                                        |
 | --------------------------------------------------------- | ----------------------------------------------------------- |
 | ![traefik_static_servers](doc/traefik_static_servers.png) | ![traefik_dynamic_servers](doc/traefik_dynamic_servers.png) |
+
+To test the load balancing, we've added a simple php script in our static server to see the IP address of the server that's serving the web page.
+
+```php
+<?php
+# server.php
+echo $_SERVER['SERVER_ADDR'];
+```
 
