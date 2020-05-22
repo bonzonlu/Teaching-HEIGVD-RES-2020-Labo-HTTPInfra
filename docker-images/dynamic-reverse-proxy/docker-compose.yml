@@ -7,6 +7,7 @@ services:
         - "traefik.port=80"
         - "traefik.http.routers.static-http.rule=Host(`res.summer-adventure.io`)"
         - "traefik.http.routers.static-http.entrypoints=web"
+        - "traefik.http.services.static-http.loadbalancer.sticky.cookie=true"
 
   dynamic-http:
     build: ../express-image/
