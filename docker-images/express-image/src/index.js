@@ -1,11 +1,14 @@
 const Chance = require('chance');
 const express = require('express');
+const ip = require('ip');
+
+
 
 const chance = new Chance();
 const app = express();
 
 app.get('/', (req, res) => {
-  res.send("Welcome to our app!");
+  res.send(`Welcome to our app! This service is being served by ${ip.address()}`);
 });
 
 app.get('/hashtag', (req, res) => {
