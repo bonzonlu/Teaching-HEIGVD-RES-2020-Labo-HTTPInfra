@@ -584,3 +584,36 @@ To test the load balancing, we've added a simple php script in our static server
 echo $_SERVER['SERVER_ADDR'];
 ```
 
+Then we can access the script at `res.summer-adventure.io/server.php`.  By refreshing the page, we can see the IP address changing, meaning that the requests are balanced between our static HTTP services
+
+![](doc/load-balancing.gif)
+
+## Additional 2 Load balancing: round-robin vs sticky sessions
+
+Traefik offers a simple solution to enable `sticky sessions`. All we need to do is add the following  int the configuration of the static server in the `docker-compose.yml`.
+
+```yml
+static-http:
+# ...
+    labels:
+		# ...
+        - "traefik.http.services.static-http.loadbalancer.sticky.cookie=true"
+```
+
+![](doc/load-balancing-sticky.gif)
+
+
+
+To test the load balancing, we've updated the API in our dynamic server to return the IP address of the server that's serving the web page.$
+
+```
+TODO add code
+```
+
+> Note: TODO explain we added lib 
+
+If we access the dynamic HTTP server, we can notice that round-robin load balancing still works :fire:
+
+![](doc/load-balancing-dynamic.gif)
+
+> Note: We don't know why the IP addresses changed to 192.168.x.y 
