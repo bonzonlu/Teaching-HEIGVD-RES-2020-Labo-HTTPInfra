@@ -3,20 +3,20 @@ services:
   static-http:
     build: ../apache-php-image/
     labels:
-        - "traefik.enable=true"
-        - "traefik.port=80"
-        - "traefik.http.routers.static-http.rule=Host(`res.summer-adventure.io`)"
-        - "traefik.http.routers.static-http.entrypoints=web"
-        - "traefik.http.services.static-http.loadbalancer.sticky.cookie=true"
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - "traefik.http.routers.static-http.rule=Host(`res.summer-adventure.io`)"
+      - "traefik.http.routers.static-http.entrypoints=web"
+      - "traefik.http.services.static-http.loadbalancer.sticky.cookie=true"
 
   dynamic-http:
     build: ../express-image/
     labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.dynamic-http.rule=Host(`res.summer-adventure.io`) && PathPrefix(`/api`)"
-        - "traefik.http.routers.dynamic-http.middlewares=strip-prefix"
-        - "traefik.http.middlewares.strip-prefix.stripprefix.prefixes=/api"
-        - "traefik.http.services.dynamic-http.loadbalancer.server.port=3000"
+      - "traefik.enable=true"
+      - "traefik.http.routers.dynamic-http.rule=Host(`res.summer-adventure.io`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.dynamic-http.middlewares=strip-prefix"
+      - "traefik.http.middlewares.strip-prefix.stripprefix.prefixes=/api"
+      - "traefik.http.services.dynamic-http.loadbalancer.server.port=3000"
 
   reverse-proxy:
     image: traefik
@@ -24,11 +24,11 @@ services:
       - 80:80
       - 8080:8080
     command:
-        - "--api.insecure=true"
-        - "--providers.docker"
-        - "--entrypoints.web.address=:80"
-        - "--providers.docker.exposedbydefault=false"
+      - "--api.insecure=true"
+      - "--providers.docker"
+      - "--entrypoints.web.address=:80"
+      - "--providers.docker.exposedbydefault=false"
     volumes:
-    # So that Traefik can listen to the Docker events
-    - /var/run/docker.sock:/var/run/docker.sock
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
 

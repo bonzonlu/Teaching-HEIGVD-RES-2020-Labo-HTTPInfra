@@ -588,7 +588,7 @@ Then we can access the script at `res.summer-adventure.io/server.php`.  By refre
 
 ![](doc/load-balancing.gif)
 
-## Additional 2 Load balancing: round-robin vs sticky sessions
+## Additional 2 - Load balancing: round-robin vs sticky sessions
 
 Traefik offers a simple solution to enable `sticky sessions`. All we need to do is add the following  int the configuration of the static server in the `docker-compose.yml`.
 
@@ -617,3 +617,9 @@ If we access the dynamic HTTP server, we can notice that round-robin load balanc
 ![](doc/load-balancing-dynamic.gif)
 
 > Note: We don't know why the IP addresses changed to 192.168.x.y 
+
+
+
+## Additional 3 - Dynamic cluster management 
+
+TODO explain life and how traefik does this https://docs.traefik.io/getting-started/concepts/
