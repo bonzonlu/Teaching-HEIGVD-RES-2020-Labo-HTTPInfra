@@ -448,11 +448,11 @@ Every 3 seconds, a `GET` request is made to the API to get a new hashtag and upd
 
 ## Step 5: Dynamic reverse proxy configuration
 
-For this step, we will deviate from the webcasts, follow our own path and use a cool tool called [Traefik](https://docs.traefik.io/) which is (as described in their own terms) an open-source Edge Router that makes publishing our services a fun and easy experience. It is also natively compliant with Docker. We will reuse the Docker containers created in [step 3](#Step 3: Reverse proxy with apache (static configuration)) but avoid the hassle of hardcoding manual IP adresses or creating scripts.
+For this step, we will deviate from the webcasts, follow our own path and use a cool tool called [Traefik](https://docs.traefik.io/) which is (as described in their own terms) an open-source Edge Router that makes publishing our services a fun and easy experience. It is also natively compliant with Docker. We will reuse the Docker containers created in [step 3](#step-3-reverse-proxy-with-apache-static-configuration)) but avoid the hassle of hardcoding manual IP adresses or creating scripts.
 
 ### Setup
 
-As stated in the [possible improvements section in step 3](#Possible improvements), Docker-compose is the tool we're going to use, and it is built in MacOS Docker Desktop.
+As stated in the [possible improvements section in step 3](#possible-improvements), Docker-compose is the tool we're going to use, and it is built in MacOS Docker Desktop.
 
 So first off we are going to create a simple `docker-compose.yml` file listing our services:
 
@@ -481,47 +481,47 @@ services:
   static-http:
     build: ../apache-php-image/
     labels:
-    	  # Enables the service in Traefik
-        - "traefik.enable=true"
-        # Sets the port to 80 for this service
-        - "traefik.port=80"
-        # Allows connection via the url "res.summer-adventure.io"
-        - "traefik.http.routers.static-http.rule=Host(`res.summer-adventure.io`)"
-        # Sets the entrypoint to the one declared later on
-        - "traefik.http.routers.static-http.entrypoints=web"
+      # Enables the service in Traefik
+      - "traefik.enable=true"
+      # Sets the port to 80 for this service
+      - "traefik.port=80"
+      # Allows connection via the url "res.summer-adventure.io"
+      - "traefik.http.routers.static-http.rule=Host(`res.summer-adventure.io`)"
+      # Sets the entrypoint to the one declared later on
+      - "traefik.http.routers.static-http.entrypoints=web"
 
   dynamic-http:
     build: ../express-image/
     labels:
-        - "traefik.enable=true"
-        # We add the PathPrefix so our generators apps are accessible at the "res.summer-adventure.io/api" url
-        - "traefik.http.routers.dynamic-http.rule=Host(`res.summer-adventure.io`) && PathPrefix(`/api`)"
-        # Removes the specified prefix "/api" from the URL path
-        - "traefik.http.routers.dynamic-http.middlewares=strip-prefix"
-        - "traefik.http.middlewares.strip-prefix.stripprefix.prefixes=/api"
-         # Enables load balancing on port 3000 for the dynamic-http service
-        - "traefik.http.services.dynamic-http.loadbalancer.server.port=3000"
+      - "traefik.enable=true"
+      # We add the PathPrefix so our generators apps are accessible at the "res.summer-adventure.io/api" url
+      - "traefik.http.routers.dynamic-http.rule=Host(`res.summer-adventure.io`) && PathPrefix(`/api`)"
+      # Removes the specified prefix "/api" from the URL path
+      - "traefik.http.routers.dynamic-http.middlewares=strip-prefix"
+      - "traefik.http.middlewares.strip-prefix.stripprefix.prefixes=/api"
+      # Enables load balancing on port 3000 for the dynamic-http service
+      - "traefik.http.services.dynamic-http.loadbalancer.server.port=3000"
 
   reverse-proxy:
-  	# Uses the official Traefik Docker image
+    # Uses the official Traefik Docker image
     image: traefik
     ports:
-    	# The HTTP port
+      # The HTTP port
       - 80:80
       # The Web UI (enabled by --api.insecure=true)
       - 8080:8080
     command:
-    		# Enables the web UI
-        - "--api.insecure=true"
-        # Tells Traefik to listen to Docker
-        - "--providers.docker"
-        # Defines an entrypoint "web" listening on port 80
-        - "--entrypoints.web.address=:80"
-        # Ignores non-enabled services (with the "traefik.enable=true" rule)
-        - "--providers.docker.exposedbydefault=false"
+    # Enables the web UI
+      - "--api.insecure=true"
+      # Tells Traefik to listen to Docker
+      - "--providers.docker"
+      # Defines an entrypoint "web" listening on port 80
+      - "--entrypoints.web.address=:80"
+      # Ignores non-enabled services (with the "traefik.enable=true" rule)
+      - "--providers.docker.exposedbydefault=false"
     volumes:
-    # So that Traefik can listen to the Docker events
-    - /var/run/docker.sock:/var/run/docker.sock
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
 ```
 
 So now our Traefik router is configured, we can now run it using the following command :
@@ -546,7 +546,7 @@ Our super duper website is now accessible at `res.summer-adventure.io` and our t
 
 ![traefik_home](doc/traefik_home.png)
 
-Shaun 🐑 is still here ! 
+Shaun :sheep: is still here ! 
 
 ![traefik_profile](doc/traefik_profile.png)
 
