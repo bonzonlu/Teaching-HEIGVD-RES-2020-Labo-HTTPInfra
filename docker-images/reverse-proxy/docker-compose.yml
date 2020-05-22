@@ -1,15 +1,15 @@
 version: "3.8"
 services:
   static-http:
-    build: docker-images/apache-php-image/
+    build: ../apache-php-image/
     container_name: static-http
 
   dynamic-http:
-    build: docker-images/express-image/
+    build: ../express-image/
     container_name: dynamic-http
 
   reverse-proxy:
-    build: docker-images/reverse-proxy
+    build: .
     container_name: reverse-proxy
     ports:
       - 8080:80
