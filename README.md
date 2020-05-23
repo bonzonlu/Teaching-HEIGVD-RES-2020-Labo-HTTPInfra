@@ -257,7 +257,7 @@ We've setup an empty default virtual to restrict the access to our servers. By d
 
 This virtual host is the one that will be used for our reverse proxy. The first thing we did is specify a `ServerName` so that our server will only accept requests with that name set in the `Host` part of the HTTP header.
 
-Next we've configured 2 `ProxyPass`, one for the api and the second for the static website. Their purpose is to redirect the requests to the correct server. If they start by `/api/`, they'll will be redirected to the dynamic HTTP server otherwise, they'll be redirected to the static HTTP server.
+Next we've configured 2 `ProxyPass`, one for the API and the second for the static website. Their purpose is to redirect the requests to the correct server. If they start by `/api/`, they'll will be redirected to the dynamic HTTP server otherwise, they'll be redirected to the static HTTP server.
 
 > Note: There's one big issue with this configuration. It's that we've "hard coded" the IP addresses of our servers. This is a problem because we do not know what addresses docker will give to our servers. 
 
@@ -409,7 +409,7 @@ Connection: close
 
 ## Step 4: AJAX requests
 
-In this step. we're going to create a javascript script to fetch `hashtags` from our api with **AJAX**. We opted **not** to use JQuery because plain old JavaScript has evolved so much that it is now very easy to make AJAX queries and interact with the DOM. 
+In this step. we're going to create a javascript script to fetch `hashtags` from our API with **AJAX**. We opted **not** to use JQuery because plain old JavaScript has evolved so much that it is now very easy to make AJAX queries and interact with the DOM. 
 
 > Note: Nowadays, web apps are developed using frontend frameworks such as Vue.Js (:heart:), React and Angular.
 
@@ -425,7 +425,7 @@ fetchHashtag();
 setInterval(fetchHashtag, 3000);
 
 /**
- * Fetch a hashtag from the api
+ * Fetch a hashtag from the API
  */
 function fetchHashtag() {
   fetch("/api/hashtag/")
@@ -448,13 +448,17 @@ Every 3 seconds, a `GET` request is made to the API to get a new hashtag and upd
 
 ## Step 5: Dynamic reverse proxy configuration
 
-For this step, we will deviate from the webcasts, follow our own path and use a cool tool called [Traefik](https://docs.traefik.io/) which is (as described in their own terms) an open-source Edge Router that makes publishing our services a fun and easy experience. It is also natively compliant with Docker. We will reuse the Docker containers created in [step 3](#step-3-reverse-proxy-with-apache-static-configuration)) but avoid the hassle of hardcoding manual IP adresses or creating scripts.
+![traefik_quickstart_diagram](doc/traefik_quickstart_diagram.png)
+
+For this step, we will deviate from the webcasts, follow our own path and use a cool tool called [Traefik](https://docs.traefik.io/) which is (as described in their own terms) *an open-source Edge Router that makes publishing our services a fun and easy experience*. It is also natively compliant with Docker. We will reuse the Docker containers created in [step 3](#step-3-reverse-proxy-with-apache-static-configuration) but avoid the hassle of hardcoding manual IP adresses or creating scripts.
 
 ### Setup
 
 As stated in the [possible improvements section in step 3](#possible-improvements), Docker-compose is the tool we're going to use, and it is built in MacOS Docker Desktop.
 
-So first off we are going to create a simple `docker-compose.yml` file listing our services:
+> TODO : add a comment about Linux availability of Docker-compose ? ^^^^^
+
+So first off we are going to create a simple `docker-compose.yml` file listing our services :
 
 ```yaml
 # docker-compose.yml
@@ -472,7 +476,7 @@ services:
       - 8080:8080
 ```
 
-We declare two services `static-http` for our cool website and `dynamic-http` for our also cool random generator apps, and set up a few ports for our `reverse proxy`. And then we add the Traefik magic in the same file :
+We declare two services `static-http` for our cool website and `dynamic-http` for our also cool random generator APIs, and set up a few ports for our `reverse proxy`. And then we add the Traefik magic in the same file :
 
 ```yml
 # docker-compose.yml
@@ -532,13 +536,13 @@ docker-compose up -d
 
 ### Usage
 
-Traefik offers a built-in dashboard with a lot of useful informations on entrypoints, routers, services, middlewares for HTTP, TCP and UDP protocols. The page is accessible on the `8080` port, so if we type in `res.summer-adventure.io:8080` in our favourite web browser, we land on the following (dark themed ftw :heart:) page :
+Traefik offers a built-in dashboard with a lot of useful informations on entrypoints, routers, services, middlewares for HTTP, TCP and UDP protocols. The page is accessible on the `8080` port, so if we type in `res.summer-adventure.io:8080` in our favourite web browser, we land on the following page :
 
 ![traefik_dashboard](doc/traefik_dashboard.png)
 
-Our super duper website is now accessible at `res.summer-adventure.io` and our top notch api at `res.summer-adventure.io/api`
+Our super duper website is now accessible at `res.summer-adventure.io` and our top notch APIs at `res.summer-adventure.io/api`
 
-> Reminder: Existing entry point of our api are:
+> Reminder: Existing entry points of our API are:
 >
 > * /hashtag
 > * /profile
@@ -558,7 +562,7 @@ And so is Donald Young !
 
 A cool feature that is built in Traefik is the ability to make load balancing when multiple instances of a same container (nodes) are run simultaneously. By using the following command we can tell Traefik to run a defined amount of services and [load balancing](https://docs.traefik.io/getting-started/quick-start/#more-instances-traefik-load-balances-them) will be automatically set up using a [Round Robin](https://docs.traefik.io/routing/services/#load-balancing) implementation.
 
-```
+```bash
 docker-compose up --scale static-http=2 --scale dynamic-http=3
 ```
 
@@ -584,19 +588,20 @@ To test the load balancing, we've added a simple php script in our static server
 echo $_SERVER['SERVER_ADDR'];
 ```
 
-Then we can access the script at `res.summer-adventure.io/server.php`.  By refreshing the page, we can see the IP address changing, meaning that the requests are balanced between our static HTTP services
+Then we can access the script at `res.summer-adventure.io/server.php`. By refreshing the page, we can see the IP address changing, meaning that the requests are balanced between our static HTTP services.
 
 ![](doc/load-balancing.gif)
 
 ## Additional 2 - Load balancing: round-robin vs sticky sessions
 
-Traefik offers a simple solution to enable `sticky sessions`. All we need to do is add the following  int the configuration of the static server in the `docker-compose.yml`.
+Traefik offers a simple solution to enable sticky sessions. All we need to do is add the following in the configuration of the static server in the `docker-compose.yml`.
 
 ```yml
+# docker-compose.yml
 static-http:
 # ...
     labels:
-		# ...
+    		# ...
         - "traefik.http.services.static-http.loadbalancer.sticky.cookie=true"
 ```
 
@@ -604,13 +609,26 @@ static-http:
 
 
 
-To test the load balancing, we've updated the API in our dynamic server to return the IP address of the server that's serving the web page.$
+To test the load balancing, we've updated the API in our dynamic server to return the IP address of the server that's serving the web page. 
 
-```
-TODO add code
+```bash
+npm install ip
 ```
 
-> Note: TODO explain we added lib 
+> Note : We've added the [ip package](https://www.npmjs.com/package/ip) to our package list using the previous command. It contains IP address utilities for node.js
+
+Below is the code we added in the index page of our JS API :
+
+```javascript
+// docker-images/express-image/src/index.js
+// ...
+const ip = require('ip')
+// ...
+app.get('/', (req, res) => {
+  res.send(`Welcome to our app! This service is being served by ${ip.address()}`);
+});
+// ...
+```
 
 If we access the dynamic HTTP server, we can notice that round-robin load balancing still works :fire:
 
@@ -622,4 +640,76 @@ If we access the dynamic HTTP server, we can notice that round-robin load balanc
 
 ## Additional 3 - Dynamic cluster management 
 
-TODO explain life and how traefik does this https://docs.traefik.io/getting-started/concepts/
+By using Traefik, dynamic cluster management is also a built-in feature. Basically Traefik needs to listen to Docker events in order to create a link between the containers and the reverse proxy. This link is created by adding the following lines in the configuration of the reverse proxy in our `docker-compose.yml` file : 
+
+```yml
+# docker-compose.yml
+reverse-proxy:
+	# ...
+	volumes:
+		# So that Traefik can listen to the Docker events
+		- /var/run/docker.sock:/var/run/docker.sock
+```
+
+Now that Traefik listens to the Docker socket, if we start or kill a container at any time, it will automatically be added or removed from the reverse proxy, and the load balancer will be dynamically updated to reflect the cluster's state. This is all based on the [Auto Service Disovery](https://docs.traefik.io/getting-started/concepts/#auto-service-discovery) principle of Traefik : "*When a service is deployed, Traefik detects it immediately and updates the routing rules in real time. The opposite is true: when you remove a service from your infrastructure, the route will disappear accordingly.*"
+
+Traefik discovers the services by using the cluster API of the provider (for us it's Docker) and is able to read the attached information.
+
+> TODO : Add GIF ?
+
+## Additional 4 - Management UI
+
+And last but not least, we found an open-source toolset to manage Docker containers called [Portainer](https://www.portainer.io/). This toolset offers a complete control over Docker containers, stacks, images and volumes, with the ability to easily create and duplicate, start, stop and kill containers, and also edit configurations.
+
+The deployment is pretty simple. Portainer server comes as a standalone Docker container, and can be setup with the following commands in a terminal :
+
+```bash
+$ docker volume create portainer_data
+$ docker run -d -p 18000:8000 -p 19000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
+```
+
+Or using a dedicated `docker-compose.yml` file such as the following :
+
+```yaml
+# docker-images/manager/docker-compose.yml
+version: "3.8"
+services:
+  portainer:
+    image: portainer/portainer
+    restart: always
+    ports:
+      - 19000:9000
+      - 18000:8000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./portainer_data:/data
+
+```
+
+When accessing the port `19000` of the Docker engine where Portainer is running using a web browser for the first time, in our case `res.summer-adventure.io:19000/`, we are greeted with a form to create the initial administrator user.
+
+> TODO : resize this image... vvvvv
+
+![portainer_admin](doc/portainer_admin.png)
+
+Then we need to select the Docker environment we want to manage through Portainer.
+
+![portainer_select_docker_type](doc/portainer_select_docker_type.png)
+
+In our case it's a local install, so we make sure that we started the Portainer container using the `-v` flag described on the page and click connect.
+
+![portainer_home](doc/portainer_home.png)
+
+And ta-da ! We arrive on the home page of Portainer. It displays the available endpoints and a few info about it (name, number of stacks and containers, number of running and stopped containers, etc...)
+
+We can click on it and land on the dashboard interface of the local endpoint. On the left pane is a list of the elements we can interact with.
+
+![portainer_local_dashboard](doc/portainer_local_dashboard.png)
+
+Stacks will display the list of stacks, if we click on `dynamic-reverse-proxy`, we can view a list of containers in this particular stack and manage (start, stop, kill, restart, pause, resume and remove) all the containers.
+
+![portainer_stacks](doc/portainer_stacks.png)
+
+This toolset seems very powerful and complete, offers a handful of monitoring and administation features, but we will not explain much more about it, the UI is pretty and easy to use and the [Portainer documentation]() is also a good starting point to seek resources.
+
+> TODO : How much details? Do we explain how to duplicate a container, create a new one and all the options available?
