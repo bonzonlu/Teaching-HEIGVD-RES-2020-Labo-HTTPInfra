@@ -1,4 +1,8 @@
 version: "3.8"
+volumes:
+  portainer_data:
+    name: portainer_data
+
 services:
   portainer:
     image: portainer/portainer
@@ -8,4 +12,4 @@ services:
       - 18000:8000
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./portainer_data:/data
+      - portainer_data:/data
