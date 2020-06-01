@@ -281,7 +281,7 @@ Once you have the configuration files sorted, all that is left to do is build an
 
 ```bash
 docker build --tag res/reverse-proxy .
-docker run -d --rm -p 8080:80 --name reverse-proxy res/reverse-proxy
+docker run -d --rm -p 9090:80 --name reverse-proxy res/reverse-proxy
 ```
 
 And voila, you have the reverse proxy and both HTTP servers up and running.
@@ -302,7 +302,7 @@ If you want to be able to use the services, you'll need update your `hosts` file
 
 The value of **<ip>** depends on your system. If you are using Linux, you can simply put `127.0.0.1`. On Windows and MacOS, you'll need to put the IP address of the Docker virtual machine.
 
-You can now access the services at `res.summer-adventure.io:8080`.
+You can now access the services at `res.summer-adventure.io:9090`.
 
 #### Possible improvements
 

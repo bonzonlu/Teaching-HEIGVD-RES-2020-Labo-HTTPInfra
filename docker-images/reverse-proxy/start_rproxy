@@ -22,4 +22,4 @@ res=$(./generate_vhost $static_name $dynamic_name)
 
 # build and start the reverse proxy
 docker build --tag res/reverse-proxy .
-docker run -d --rm -p 8080:80 --name reverse-proxy res/reverse-proxy
+docker run -d --rm -p 9090:80 --name reverse-proxy res/reverse-proxy
