@@ -108,7 +108,7 @@ You'll then be able to access the website at `localhost:9090`.
 
 ![](doc/demo_step1.jpg)
 
-Here we can see that we built and run the Docker container using the scripts, then showed the running containers. In the background we can see the web page up and running on `localhost:9090`.  
+Here we can see that we built and run the Docker container using the scripts, then showed the running containers. In the background we can see the web page up and running on `localhost:9090`.
 
 ## Step 2: Dynamic HTTP server with express.js
 
@@ -257,7 +257,7 @@ This is the virtual host that will be used for our reverse proxy. The first thin
 
 Next we've configured 2 `ProxyPass`, one for the API and the second for the static website. Their purpose is to redirect the requests to the correct server. If they start by `/api/`, they'll will be redirected to the dynamic HTTP server otherwise, they'll be redirected to the static HTTP server.
 
-> Note: There's one big issue with this configuration. It's that we've "hard coded" the IP addresses of our servers. This is a problem because we do not know what addresses docker will give to our servers. 
+> Note: There's one big issue with this configuration. It's that we've "hard coded" the IP addresses of our servers. This is a problem because we do not know what addresses docker will give to our servers.
 
 ### Setup
 
@@ -302,7 +302,7 @@ If you want to be able to use the services, you'll need update your `hosts` file
 
 The value of **<ip>** depends on your system. If you are using Linux, you can simply put `127.0.0.1`. On Windows and MacOS, you'll need to put the IP address of the Docker virtual machine.
 
-You can now access the services at `res.summer-adventure.io`.
+You can now access the services at `res.summer-adventure.io:8080`.
 
 #### Possible improvements
 
@@ -320,7 +320,7 @@ Same as before, you'll need to update the hosts file.
 
 
 
-An even better solution, would be to use [docker-compose](https://docs.docker.com/compose/) to manage our containers. 
+An even better solution, would be to use [docker-compose](https://docs.docker.com/compose/) to manage our containers.
 
 We'll start by defining our services in a `docker-compose.yml` file.
 
@@ -344,7 +344,7 @@ services:
 
 Then in the reverse proxy VirtualHost, the IP addresses can be replaced with the name of the services. Like this:
 
-> Note: You can to copy the content of `example-compose-reverse-proxy.conf` in `001-reverse-proxy.conf`. 
+> Note: You can to copy the content of `example-compose-reverse-proxy.conf` in `001-reverse-proxy.conf`.
 
 ```
 <VirtualHost *:80>
@@ -407,7 +407,7 @@ Connection: close
 
 ## Step 4: AJAX requests
 
-In this step. we're going to create a javascript script to fetch `hashtags` from our API with **AJAX**. We opted **not** to use JQuery because plain old JavaScript has evolved so much that it is now very easy to make AJAX queries and interact with the DOM. 
+In this step. we're going to create a javascript script to fetch `hashtags` from our API with **AJAX**. We opted **not** to use JQuery because plain old JavaScript has evolved so much that it is now very easy to make AJAX queries and interact with the DOM.
 
 > Note: Nowadays, web apps are developed using frontend frameworks such as Vue.Js (:heart:), React and Angular.
 
@@ -452,7 +452,7 @@ For this step, we will deviate from the webcasts, follow our own path and use a 
 
 ### Setup
 
-As stated in the [possible improvements section in step 3](#possible-improvements), Docker-compose is the tool we're going to use. Depending on how you use Docker on your system, you might have to install `docker-compose`. If you're using Docker Desktop for MacOS or Windows, it's built in so you won't need to install it. If you're running Linux, you'll have to install it. You can have a look [here](https://docs.docker.com/compose/install/) to see how to install it. 
+As stated in the [possible improvements section in step 3](#possible-improvements), Docker-compose is the tool we're going to use. Depending on how you use Docker on your system, you might have to install `docker-compose`. If you're using Docker Desktop for MacOS or Windows, it's built in so you won't need to install it. If you're running Linux, you'll have to install it. You can have a look [here](https://docs.docker.com/compose/install/) to see how to install it.
 
 
 
@@ -521,12 +521,12 @@ dynamic-http:
     labels:
       # Enables the service in Traefik
       - "traefik.enable=true"
-      # define the host to `res.summer-adventure.io` and add a PathPrefix so 
+      # define the host to `res.summer-adventure.io` and add a PathPrefix so
       # this service is only accessible if it's present
       # "res.summer-adventure.io/api"
       - "traefik.http.routers.dynamic-http.rule=Host(`res.summer-adventure.io`) && PathPrefix(`/api`)"
       # the api doesn't have the "api" prefix in the routes it offers
-      # so we need to remove it 
+      # so we need to remove it
       - "traefik.http.routers.dynamic-http.middlewares=strip-prefix"
       - "traefik.http.middlewares.strip-prefix.stripprefix.prefixes=/api"
       # the dynamic server listens on the port 3000, so we tell traefik
@@ -556,7 +556,7 @@ Our super duper website is now accessible at `res.summer-adventure.io` and our t
 
 ![traefik_home](doc/traefik_home.png)
 
-Shaun :sheep: is still here ! 
+Shaun :sheep: is still here !
 
 ![traefik_profile](doc/traefik_profile.png)
 
@@ -607,7 +607,7 @@ Traefik offers a simple solution to enable sticky sessions. All we need to do is
 static-http:
 # ...
     labels:
-        # ...
+    		# ...
         - "traefik.http.services.static-http.loadbalancer.sticky.cookie=true"
 ```
 
@@ -638,9 +638,9 @@ If we access the dynamic HTTP server, we can notice that round-robin load balanc
 
 ![](doc/load-balancing-dynamic.gif)
 
-> Note: We don't know why the IP addresses changed to 192.168.x.y 
+> Note: We don't know why the IP addresses changed to 192.168.x.y
 
-## Additional 3 - Dynamic cluster management 
+## Additional 3 - Dynamic cluster management
 
 Dynamic cluster management is also a built-in feature in Traefik. For it to work, we need to let Traefik listen to the Docker socket. All we need to map the docker socket of our machine with the reverse proxy container. We can to this by using a volume. We've already configured it while [setting up the reverse proxy](#setup-3) , but here's what it looks like:
 
@@ -672,7 +672,7 @@ Now we can use the `--scale` option to add more servers
 ```bash
 $ docker-compose up -d --scale static-http=2
 dynamic-reverse-proxy_reverse-proxy_1 is up-to-date
-Starting dynamic-reverse-proxy_static-http_1 ... 
+Starting dynamic-reverse-proxy_static-http_1 ...
 Starting dynamic-reverse-proxy_static-http_1 ... done
 Creating dynamic-reverse-proxy_static-http_2 ... done
 ```
